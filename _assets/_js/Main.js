@@ -3,18 +3,48 @@
 	
 	var t;
 	
-	var result = "LOSE";
+	var result = "WIN";
 	
 	var DISPLAY = {};
+	
+	var battleEndAnimation = true;
+	
+	var mountains;
 	
 	$(document).ready(function(){ init(); });	
 	
 	
 	function init()
 	{
-		var css;
+		
 		
 		trace("init();");
+		
+
+		
+		
+		mountains = {};
+		
+		
+		mountains.width_full 	= $("#microBattle_resultWipe_content .microBattle_endSky").width();
+		mountains.width_side 	= $("#microBattle_resultWipe_content .microBattle_endSky_mountainL").width();
+		mountains.width_center 	= $("#microBattle_resultWipe_content .microBattle_endSky_mountainC").width();
+		
+		mountains.space_available 	= 0;
+		mountains.space_adjust 		= 0;
+		
+		
+		 $(window).on("resize", fake_screenUpdate);
+		 
+		 fake_screenUpdate(null);
+		
+		test_showEndSequence();
+	}
+	
+	
+	function fake_screenUpdate(event)
+	{
+		var css;
 		
 		DISPLAY._width 			= window.screen.width;
 		DISPLAY._height 		= window.screen.height;
@@ -29,7 +59,11 @@
 		$("#microBattle_resultWipe_content").css(css);
 		
 		
-		test_showEndSequence();
+		
+		if(mountains != null || mountains != undefined)
+		{
+			test_alignMountains_measure();
+		}		
 	}
 	
 	function test_showEndSequence()
@@ -62,6 +96,8 @@
 		
 		$("#microBattle_resultWipe_content .microBattle_zombie").addClass("microBattle_zombie_WIN");
 		
+		$("#microBattle_resultWipe_content .microBattle_growField").addClass("microBattle_growField_WIN");
+		
 		
 		// TWEENS
 		$("#microBattle_resultWipe_content .microBattle_castle_flag").addClass("tween-microBattle_castle_flag");
@@ -82,21 +118,15 @@
 		
 		$(".microBattle_sunMoon").addClass("microBattle_sunMoon_LOSE");
 		
+		$("#microBattle_resultWipe_content .microBattle_growField").addClass("microBattle_growField_LOSE");
+		
 		// TWEENS
 		$("#microBattle_resultWipe_content .microBattle_zombie_walk").addClass("tween-microBattle_zombie_walk");
 	}
 	
 	function test_showEndSequenceSkyStart()
 	{
-		var css;
-		
-		css = 	{
-					"opacity" 			: "1",
-					"-webkit-transform" : "translateY(0)",
-					"transform" 		: "translateY(0)"
-				};
-				
-		$("#microBattle_resultWipe_content .microBattle_sunMoon_sprite").css(css);
+		$("#microBattle_resultWipe_content .microBattle_sunMoon_sprite").removeClass("microBattle_sunMoon_sprite_set").addClass("microBattle_sunMoon_sprite_rise");
 		
 		$(".tween-microBattle_sunMoon_sprite")[0].addEventListener("webkitTransitionEnd", test_showEndSequenceSkyInPlace, false);
 		$(".tween-microBattle_sunMoon_sprite")[0].addEventListener("transitionend", test_showEndSequenceSkyInPlace, false);		
@@ -131,7 +161,10 @@
 				};
 		
 		$("#microBattle_resultWipe_content .microBattle_castle_flag_WIN").css(css);
-		$("#microBattle_resultWipe_content .microBattle_castle_goat_WIN").css(css);		
+		$("#microBattle_resultWipe_content .microBattle_castle_goat_WIN").css(css);
+		
+		$("#microBattle_resultWipe_content .microBattle_growField").css(css);
+		$("#microBattle_resultWipe_content .microBattle_growField").css("opacity", "1");		
 	}
 	
 	// LOSE
@@ -140,11 +173,42 @@
 	{
 		var css;
 		
+		var zombie_y;
+		
+		zombie_y = $("#microBattle_resultWipe_content .microBattle_endField").height();
+		
 		css = 	{
-					"-webkit-transform" : "translateY(" + DISPLAY._height + "px)",
-					"transform"			: "translateY(" + DISPLAY._height + "px)"
+					"-webkit-transform" : "translateY(" + zombie_y + "px)",
+					"transform"			: "translateY(" + zombie_y + "px)"
 				};
 				
 		$("#microBattle_resultWipe_content .microBattle_zombie_walk").css(css);			
+	}
+	
+	function test_alignMountains_measure()
+	{
+		mountains.width_full = $("#microBattle_resultWipe_content .microBattle_endSky").width();
+		
+		mountains.space_available = Math.abs(Math.floor((mountains.width_full - mountains.width_center) * 0.5));
+		
+		if(mountains.space_available < mountains.width_side)
+		{
+			mountains.space_adjust = Math.abs(mountains.width_side - mountains.space_available);
+			
+			test_alignMountains_set($("#microBattle_resultWipe_content .microBattle_endSky_mountainL"), -mountains.space_adjust);
+			test_alignMountains_set($("#microBattle_resultWipe_content .microBattle_endSky_mountainR"), mountains.space_adjust);
+		}
+		
+		trace(mountains);		
+	}
+	
+	function test_alignMountains_set(mountain_div, mountain_x)
+	{
+		var css = 	{
+						"-webkit-transform" : "translateX(" + mountain_x + "px)",
+						"transform" 		: "translateX(" + mountain_x + "px)"
+					};
+					
+		$(mountain_div).css(css);		
 	}
 	
